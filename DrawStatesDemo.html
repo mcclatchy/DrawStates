@@ -24,22 +24,9 @@
 		}
 	</style>
 </head>
-<bod
-	<h3>Let's get started</h3>
-	<p>The first thing we need to do is call up the main libraries so the browser knows what the heck we're doing. We can do this with two lines of code:</p>
-	<code>
-		&lt;script src=&quot;scripts/raphael-min.js&quot;&gt;&lt;/script&gt;
-		&lt;script src=&quot;scripts/drawStates.js&quot;&gt;&lt;/script&gt;
-		
-	</code>
-	<!-- And just to prove this all works, I'm going to actually load those files right here as well! -->
+<body style="max-width:600px;margin:auto;">
 	<script src="scripts/raphael-min.js"></script>
 	<script src="scripts/drawStates.js"></script>
-	<p>It's important that we load up the main Raphael script first. Otherwise, we won't have all the tools to draw our state map and the second file might throw an error.</p>
-	<p>You might notice both of these lines reference files on the Washington bureau site. It's probably safest for you to grab local copies and store them on your own static server. You can find <a href="https://raw.github.com/DmitryBaranovskiy/raphael/master/raphael-min.js">Raphael's library here</a>.</p>
-	<p><em>(Note, Raphael's library is hosted at GitHub and trying to directly link to that version will most likely cause an error. Please save a copy to your own server or, barring that, point directly to our version.)</em></p>
-	<p>Oh! And one more thing! If your site isn't already using JQuery, you will need to load that. As of this writing <strong>every</strong> McClatchy site uses that library, so this doesn't apply to you, though it may apply in some cases involving special project sites. If you need to load JQuery, you almost will certainly know how to load it yourself...</p>
-	<p>OK, that's it for loading the tools. Next, we can actually start trying to draw this stuff!</p>
 	<h3>Inserting the map</h3>
 	<p>The first thing we will need is somewhere to draw the map itself.</p>
 	<code>
