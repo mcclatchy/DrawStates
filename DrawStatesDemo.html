@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Untitled</title>
+	<script src="scripts/jquery-min.js"></script>
+	<style>
+		body{
+			font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+		}
+		code{
+			background:#f0f0f0;
+			padding:0 15px;
+			display:block;
+			overflow-x:auto;
+			line-height:1.5em;
+			white-space:pre-line;
+			font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+			font-size:.85em;
+		}
+		span.code{
+			font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+			font-size:.85em;
+		}
+	</style>
+</head>
+<body>
+	<p>The DC bureau has developed a lightweight, single purpose Javascript extension to streamline the production on one of the most common types of graphics &mdash; the 50-state map!</p>
+	<p>It's a small file, <a href="http://www.mcclatchydc.com/static/scripts/DrawStates.js">DrawStates.js</a>, which extends <a href="http://raphaeljs.com/">RaphaelJS</a>, a library designed for drawing and working with Vector graphics across browsers.</p>
+	<p>While this <em>brief</em> tutorial is written in a manner where you shouldn't need knowledge of Raphael, it may help to explore that library (or you may find using this extension is a good jumping off point to working with Raphael itself!)</p>
+	<h3>Let's get started</h3>
+	<p>The first thing we need to do is call up the main libraries so the browser knows what the heck we're doing. We can do this with two lines of code:</p>
+	<code>
+		&lt;script src=&quot;http://www.mcclatchydc.com/static/scripts/raphael-min.js&quot;&gt;&lt;/script&gt;
+		&lt;script src=&quot;http://www.mcclatchydc.com/static/scripts/DrawStates.js&quot;&gt;&lt;/script&gt;
+		
+	</code>
+	<!-- And just to prove this all works, I'm going to actually load those files right here as well! -->
+	<script src="scripts/raphael-min.js"></script>
+	<script src="scripts/DrawStates.js"></script>
+	<p>It's important that we load up the main Raphael script first. Otherwise, we won't have all the tools to draw our state map and the second file might throw an error.</p>
+	<p>You might notice both of these lines reference files on the Washington bureau site. It's probably safest for you to grab local copies and store them on your own static server. You can find <a href="https://raw.github.com/DmitryBaranovskiy/raphael/master/raphael-min.js">Raphael's library here</a>.</p>
+	<p><em>(Note, Raphael's library is hosted at GitHub and trying to directly link to that version will most likely cause an error. Please save a copy to your own server or, barring that, point directly to our version.)</em></p>
+	<p>Oh! And one more thing! If your site isn't already using JQuery, you will need to load that. As of this writing <strong>every</strong> McClatchy site uses that library, so this doesn't apply to you, though it may apply in some cases involving special project sites. If you need to load JQuery, you almost will certainly know how to load it yourself...</p>
+	<p>OK, that's it for loading the tools. Next, we can actually start trying to draw this stuff!</p>
+	<h3>Inserting the map</h3>
+	<p>The first thing we will need is somewhere to draw the map itself.</p>
+	<code>
+		&lt;div id=&quot;myMap&quot;&gt;&lt;/div&gt;
+		
+	</code>
+	<p>By default, the code will look for a <span class="code">&lt;div&gt;</span> tag. For now, we'll just leave it as-is and use it as an empty container.</p>
+	<p>The one thing you should make sure is that the <span class="code">id</span> property of the tag is unique. That's how the code will know where to draw our map! (Also, it's technically illegal to have non-unique <span class="code">id</span>s in HTML...)</p>
+	<p>The nice thing about the stock <span class="code">&lt;div&gt;</span> tag is that it's a block element &mdash; which means we can just drop it in without having to worry about it appearing in line with other items. It will handle all that on it's own.</p>
+	<p>Now, it's possible to float or position that block (and if you know what those things mean and want to use them feel free to explore!), but if you just use this standard tag, you'll be fine.</p>
+	<p>I've also discovered that putting elements in the container we're drawing in can do unpredictable things. This is especially true because Raphael has to use alternate drawing methods for browsers that do not suppport SVG. If you need to put things in or around the map, I recommend placing the map-container <span class="code">&lt;div&gt;</span> inside another container tag.</p>
+	<p>So, let's tell the browser to draw the map already...</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;drawStates(&quot;myMap&quot;);
+		&lt;/script&gt;
+		
+	</code>
+	<p>Once you write this code, you should see a map with fifty grey states. A lot like this actually:</p>
+	<!-- And again, we're going to include the code right here for demontrating. Note: The div has a different ID name so I can use multiple examples -->
+	<div id="map1"></div>
+	<script>
+		drawStates("map1");
+	</script>
+	<h4>If you don't see that...</h4>
+	<p>If you see a map with white states and black outlines, you probably don't have JQuery loaded. If you know how to check for it and conflicts you should start there. If you don't know what that means, feel free to give me a call.</p>
+	<p>If you don't see any map you there could be a few problems. Let's work through them:</p>
+	<ol>
+		<li>Open up your browser's Web console to start (<a href="http://webmasters.stackexchange.com/questions/8525/how-to-open-the-javascript-console-in-different-browsers">how do I do that?</a>)</li>
+		<li>Does your browser say something like: <span class="code">Raphael is not defined</span> or <span class="code">Can't find variable Raphael</span>?</li>
+		<ul>
+			<li>If so, you probably are having trouble loading Raphael. Double check your first <span class="code">script</span> tag calling the library.</li>
+			<li>Check to make sure you open and close the tag correctly, and verify that the URL you are pointing at actually contains the Javascript file (by visiting it in a browser and seeing the pile of code)</li>
+			<li>Are you maybe pulling Raphael's source library from GitHub? They're smart cookies over there and run the site in a manner which won't let you just the hosted version</li>
+		</ul>
+		<li>Does your browser say something like: <span class="code">drawStates is not defined</span> or <span class="code">Can't find variable drawStates</span>?</li>
+		<ul>
+			<li>Double check your cases. <span class="code">drawStates</span> has a lowercase "d" and an uppercase "S" and Javascript cares about these things.</li>
+			<li>Verify your second <span class="code">script</span> tag calling the DrawStates extension.</li>
+			<li>Check to make sure you open and close the tag correctly, and verify that the URL you are pointing at actually contains the Javascript file (by visiting it in a browser and seeing the pile of code)</li>
+		</ul>
+		<li>Make sure the name you passed in the parentheses of <span class="code">drawStates()</span> is correct</li>
+		<ul>
+			<li>It should be exactly the same (including upper vs. lowercase) as the <span class="code">id</span> property of your <span class="code">div</span> tag</li>
+			<li>The name should be in quotes! Javascript doesn't like names without quotes.</li>
+		</ul>
+		<li>Still at a loss? Feel free to contact me about your project.</li>
+	</ol>
+	<h3>So let's do <em>something</em> with the map</h3>
+	<p>OK, having a map is great, but doesn't really do much good. So let's make one quick change to our map so we can actually do things to it!</p>
+	<p>In order to make tweaks to our map, we need to store it with a name so Javascript can access it (<span class="code">drawStates</span> isn't a name, it's really just a command to draw the map itself. I mean, if you drew two maps with the same command, you wouldn't want them both to have the <strong>same</strong> name!)</p>
+	<p>So, we're going to store the entire map in a variable, like <span class="code">id</span>s, variable names should be unique &mdash; otherwise Javascript will just replace the old item with the new one of the same name!</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;<b>var myMap = </b>drawStates(&quot;myMap&quot;);
+		&lt;/script&gt;
+		
+	</code>
+	<p>All you have to do is tell Javascript you want it to remember the map in a variable. You do this by creating a new variable (<span class="code">var myMap</span>, notice the variable name doesn't need quotes) and then by setting your new variable <span class="code">=</span> to the command to draw the map.</p>
+	<p>So far, though, this hasn't done anything different to the map itself. But now that we've got a way of referencing our map, we can write some code to do something to it.</p>
+	<p>There are several different references that come with the map, but the most important is all the states.</p>
+	<p>Attached to your map is a <span class="code">.states</span> object. It's populated by a bunch of Raphael paths, which are each stored under their two-letter postal code abbreviations. There's a lot you can do with Raphael's path object, but the simplest things are just adjusting its attributes.</p>
+	<p>We're going to do this by calling the <span class="code">.attr</span> method of some of these shapes, <a href="http://raphaeljs.com/reference.html#Element.attr">read more here</a> (no, seriously. <a href="http://raphaeljs.com/reference.html#Element.attr">Check it out</a>. It has a great list of what you can actually change with these states we've just drawn)</p>
+	<p>So let's call that method on a few of our states:</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;var myMap = drawStates(&quot;myMap&quot;);
+		&nbsp;&nbsp;&nbsp;myMap.states[&quot;CA&quot;].attr(&quot;fill&quot;,&quot;blue&quot;);
+		&nbsp;&nbsp;&nbsp;myMap.states[&quot;KY&quot;].attr({&quot;stroke-width&quot;:10,stroke:&quot;red&quot;});
+		&lt;/script&gt;
+		
+	</code>
+	<p>The new lines tell our code to look in the states property of our map (which we stored in <span class="code">myMap</span>). In that states property we pull up the items stored under CA and KY (California and Kentucky, respectively).</p>
+	<p>When Raphael draws the shapes of our map, it also stores a bunch of instructions for changing them. Because all the state outlines are drawn using the Raphael library, we can call its <span class="code">attr</span> method to tweak how they appear.</p>
+	<p>It should all look like this:</p>
+	<!-- Again same code as listed, save for the unique id of the div -->
+	<div id="map2"></div>
+	<script>
+		var myMap = drawStates("map2");
+		myMap.states["CA"].attr("fill","blue");
+		myMap.states["KY"].attr({"stroke-width":10,stroke:"red"});
+	</script>
+	<p>Now, this is all nice and well if we just need to color in states, but honestly we could do that with a static image. So let's look at actions.</p>
+	<h3>Letting users interact with the map</h3>
+	<p>If we want users to be able to interact with all the states in the map, we're going to need to tell the states how to respond to interactions.</p>
+	<p>Javascript is essentially an incredible obedient, albeit dumb, child. It will do exactly what you tell it &mdash; and no more or less. That means, we need to tell it exactly what user interactions it needs to respond to and how.</p>
+	<p>For <strong>every</strong> individual piece we want to interact with.</p>
+	<p>Like I said, it's not very bright. We can't just tell it do this thing will the states, we have to go through and tell it to do something with each individual state</p>
+	<p>Luckily, we can use a loop to do this. I'm going to use a JQuery loop, because we've already loaded that library. If you want to use a native loop or something else, feel free to. In that case I recommend looking into <a href="http://raphaeljs.com/reference.html#Element.data">Raphael's <span class="code">element.data()</span> method</a> for keeping track of which state object users are interacting with.</p>
+	<h4>What's a loop?</h4>
+	<p>A loop is a piece of code that will run multiple times. In this instance, we're going to use a "for each" style loop. This means, Javascript will use a bit of code "for each" item in the set we give it.</p>
+	<p>Since we want all of our states to respond the same way to a user, we can use the same code to tell each object what to do when a user interacts with it:</p>
+	<code>
+		$.each(myMap.states, function(name,state){
+		&nbsp;&nbsp;&nbsp;console.log(name);
+		});
+		
+	</code>
+	<p>Here, we're using JQuery's "for each" loop (JQuery is also saved under the name <span class="code">$</span>). The first thing we tell the loop is what we want to do something for each of (where we list <span class="code">myMap.states</span>.</p>
+	<p>Then, we need to tell our script just what to do. Repeating blocks of code are known as functions, so we tell JQuery we want to perform a <span class="code">function</span> for each item in the <span class="code">myMap.states</span> collection.</p>
+	<p>Finally, we tell our new function that we're going to give it a name for each object and the state itself.</p>
+	<p>We haven't looked into how Raphael events work, so for right now, we're just using our Javascript console. If you add this code to your <span class="code">script</span> tag, you should be able to <a href="http://webmasters.stackexchange.com/questions/8525/how-to-open-the-javascript-console-in-different-browsers">open up the Javascript console</a> and see a list of all the state abbreviations!</p>
+	<h4>Actually adding interactions</h4>
+	<p>OK, so now that we know how to avoid writing the same code fifty times, once for each state, let's figure out what the code has to be in order to handle the interactions.</p>
+	<p>What we need to do is tell the states to listen for an event (and then once they hear it what they should do in response). Luckily, Raphael has several useful events built in.</p>
+	<p>The Raphael <span class="code">hover</span> event does two things. It performs an action when a user brings their mouse over an object and a second one when they move their mouse away from the object.</p>
+	<p>So let's replace our simple log code with a hover action:</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;var myMap = drawStates(&quot;myMap&quot;);
+		&nbsp;&nbsp;&nbsp;$.each(myMap.states, function(name,state){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.hover(function(){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(name);
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+		&nbsp;&nbsp;&nbsp;});
+		&lt;/script&gt;
+		
+	</code>
+	<p>Now, it might not look like this map is doing much, but if you open up your console and mouse over states, you'll see that it responds by logging out to the console the name of each state:</p>
+	<div id="map3"></div>
+	<script>
+		var myMap = drawStates("map3");
+		$.each(myMap.states, function(name,state){
+			this.hover(function(){
+				console.log(name);
+			});
+		});
+	</script>
+	<p>Logging information to the console is a useful tool for building and testing code, but it doesn't really do anything for interacting with our users.</p>
+	<p>Let's replace the <span class="code">console.log</span> with the <span class="code">attr</span> we briefly used earlier:</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;var myMap = drawStates(&quot;myMap&quot;);
+		&nbsp;&nbsp;&nbsp;$.each(myMap.states, function(name,state){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.hover(function(){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>state.attr(&quot;opacity&quot;,.5);</b>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+		&nbsp;&nbsp;&nbsp;});
+		&lt;/script&gt;
+		
+	</code>
+	<p>With that change, our states will now change change in appearance when someone <em>mouses over</em> them.</p>
+	<div id="map4"></div>
+	<script>
+		var myMap = drawStates("map4");
+		$.each(myMap.states, function(name,state){
+			this.hover(function(){
+				state.attr("opacity",.5);
+			});
+		});
+	</script>
+	<p>Now, if we want them to change back, we have to explicitly tell them to do that. Remember, Javascript is exceptionally obedient, but it will not try and guess at what it <em>should</em> do. It only does exactly what it was told.</p>
+	<p>But it's easy enough to add a second command to our <span class="code">hover</span> function, which will perform an action when a user is done hovering over a state:</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;var myMap = drawStates(&quot;myMap&quot;);
+		&nbsp;&nbsp;&nbsp;$.each(myMap.states, function(name,state){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.hover(function(){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.attr(&quot;opacity&quot;,.5);
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<b>,function(){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.attr(&quot;opacity&quot;,1);
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</b>);
+		&nbsp;&nbsp;&nbsp;});
+		&lt;/script&gt;
+		
+	</code>
+	<p>And now our map lights up states only when you put your mouse above them:</p>
+	<div id="map5"></div>
+	<script>
+		var myMap = drawStates("map5");
+		$.each(myMap.states, function(name,state){
+			this.hover(function(){
+				state.attr("opacity",.5);
+			},function(){
+				state.attr("opacity",1);
+			});
+		});
+	</script>
+	<p>So, we've made an interactive map now. Which, while great, doesn't actually do us much good. In order to make this even remotely interesting to readers, we're going to need some data to power this thing.</p>
+	<h3>Adding and storing data</h3>
+	<p>In order to make this map show any useful information, we need to give it information that's useful.</p>
+	<p>I'm going to briefly show how we can store data directly in Javascript. Now, this isn't the most flexible data solution, but it works in a pinch. Obviously, if you have clean data you can store it in any number of formats and pull it into your javascript.</p>
+	<p>Much like we needed to give a name to our map in order to access it later, we will do the same thing with our data my storing it in a variable:</p>
+	<code>
+		var greatNewsData;
+		
+	</code>
+	<p>This line tells Javascript that we will have something called <span class="code">greatNewsData</span> but it still doesn't store data.</p>
+	<p>In order to actually store data in <span class="code">greatNewsData</span> we will need to make it an object. Objects are collections of other items. In fact, <span class="code">myMap.states</span> is actually just a collection of all objects which make up our big state map.</p>
+	<p>Objects are written using <span class="code">{</span> curly braces <span class="code">}</span> like so:</p>
+	<code>
+		var greatNewsData<b> = {}</b>;
+		
+	</code>
+	<p>Inside the object (between the curly braces) we can save data by using a name for the data or <em>key</em> and a colon. Here's a sample dataset:</p>
+	<code>
+		var greatNewsData = {
+		&nbsp;&nbsp;&nbsp;AK:true,
+		&nbsp;&nbsp;&nbsp;AL:false,
+		&nbsp;&nbsp;&nbsp;AR:false,
+		&nbsp;&nbsp;&nbsp;AZ:false,
+		&nbsp;&nbsp;&nbsp;CA:true,
+		&nbsp;&nbsp;&nbsp;CO:false,
+		&nbsp;&nbsp;&nbsp;CT:false,
+		&nbsp;&nbsp;&nbsp;DC:false,
+		&nbsp;&nbsp;&nbsp;DE:false,
+		&nbsp;&nbsp;&nbsp;FL:true,
+		&nbsp;&nbsp;&nbsp;GA:true,
+		&nbsp;&nbsp;&nbsp;HI:false,
+		&nbsp;&nbsp;&nbsp;IA:false,
+		&nbsp;&nbsp;&nbsp;ID:true,
+		&nbsp;&nbsp;&nbsp;IL:true,
+		&nbsp;&nbsp;&nbsp;IN:false,
+		&nbsp;&nbsp;&nbsp;KS:true,
+		&nbsp;&nbsp;&nbsp;KY:true,
+		&nbsp;&nbsp;&nbsp;LA:false,
+		&nbsp;&nbsp;&nbsp;MA:false,
+		&nbsp;&nbsp;&nbsp;MD:false,
+		&nbsp;&nbsp;&nbsp;ME:false,
+		&nbsp;&nbsp;&nbsp;MI:false,
+		&nbsp;&nbsp;&nbsp;MN:false,
+		&nbsp;&nbsp;&nbsp;MO:true,
+		&nbsp;&nbsp;&nbsp;MS:true,
+		&nbsp;&nbsp;&nbsp;MT:false,
+		&nbsp;&nbsp;&nbsp;NC:true,
+		&nbsp;&nbsp;&nbsp;ND:false,
+		&nbsp;&nbsp;&nbsp;NE:false,
+		&nbsp;&nbsp;&nbsp;NH:false,
+		&nbsp;&nbsp;&nbsp;NJ:false,
+		&nbsp;&nbsp;&nbsp;NM:false,
+		&nbsp;&nbsp;&nbsp;NV:false,
+		&nbsp;&nbsp;&nbsp;NY:false,
+		&nbsp;&nbsp;&nbsp;OH:false,
+		&nbsp;&nbsp;&nbsp;OK:false,
+		&nbsp;&nbsp;&nbsp;OR:false,
+		&nbsp;&nbsp;&nbsp;PA:true,
+		&nbsp;&nbsp;&nbsp;RI:false,
+		&nbsp;&nbsp;&nbsp;SC:true,
+		&nbsp;&nbsp;&nbsp;SD:false,
+		&nbsp;&nbsp;&nbsp;TN:false,
+		&nbsp;&nbsp;&nbsp;TX:true,
+		&nbsp;&nbsp;&nbsp;UT:false,
+		&nbsp;&nbsp;&nbsp;VA:false,
+		&nbsp;&nbsp;&nbsp;VT:false,
+		&nbsp;&nbsp;&nbsp;WA:true,
+		&nbsp;&nbsp;&nbsp;WI:false,
+		&nbsp;&nbsp;&nbsp;WV:false,
+		&nbsp;&nbsp;&nbsp;WY:false,
+		&nbsp;&nbsp;&nbsp;US:true
+		};
+		
+	</code>
+	<p>With some data save, we can now reference our <span class="code">greatNewsData</span> variable to manipulate our map. Let's add some code for coloring states based on this data (using <span class="code">.attr</span>) and spitting out some text on the page when a user interacts with the map (using <span class="code">.hover</span>):</p>
+	<code>
+		&lt;script&gt;
+		&nbsp;&nbsp;&nbsp;var myMap = drawStates(&quot;myMap&quot;);
+		&nbsp;&nbsp;&nbsp;$.each(myMap.states, function(name,state){
+		<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(greatNewsData[name]){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.attr(&quot;fill&quot;,&quot;blue&quot;);
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</b>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.hover(function(){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.attr(&quot;opacity&quot;,.5);
+		<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(greatNewsData[name]){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(&quot;#output&quot;).text(&quot;State with great news&quot;);
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</b>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},function(){
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;state.attr(&quot;opacity&quot;,1);
+		<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(&quot;#output&quot;).html(&quot;&amp;nbsp;&quot;);</b>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+		&nbsp;&nbsp;&nbsp;});
+		&lt;/script&gt;
+		
+	</code>
+	<p>This will produce the following map, which colors in states with great news:</p>
+	<div id="output">&nbsp;</div>
+	<div id="map6"></div>
+	<script>
+		var greatNewsData = {
+			AK:true,
+			AL:false,
+			AR:false,
+			AZ:false,
+			CA:true,
+			CO:false,
+			CT:false,
+			DC:false,
+			DE:false,
+			FL:true,
+			GA:true,
+			HI:false,
+			IA:false,
+			ID:true,
+			IL:true,
+			IN:false,
+			KS:true,
+			KY:true,
+			LA:false,
+			MA:false,
+			MD:false,
+			ME:false,
+			MI:false,
+			MN:false,
+			MO:true,
+			MS:true,
+			MT:false,
+			NC:true,
+			ND:false,
+			NE:false,
+			NH:false,
+			NJ:false,
+			NM:false,
+			NV:false,
+			NY:false,
+			OH:false,
+			OK:false,
+			OR:false,
+			PA:true,
+			RI:false,
+			SC:true,
+			SD:false,
+			TN:false,
+			TX:true,
+			UT:false,
+			VA:false,
+			VT:false,
+			WA:true,
+			WI:false,
+			WV:false,
+			WY:false,
+			US:true
+		};
+		var myMap = drawStates("map6");
+		$.each(myMap.states, function(name,state){
+			if(greatNewsData[name]){
+				state.attr("fill","blue");
+			}
+		this.hover(function(){
+			state.attr("opacity",.5);
+				if(greatNewsData[name]){
+					$("#output").text("State with great news");
+				}
+			},function(){
+				state.attr("opacity",1);
+				$("#output").html("&nbsp;");
+			});
+		});
+	</script>
+	<p>This script first goes through and checks each state. If <span class="code">greatNewsData</span> has an entry for <span class="code">true</span> for that state, the code goes ahead and calls the next line, which sets the state's fill to blue.</p>
+	<p>Then the script tells each state that it should respond to a hover event. Filling the HTML object with an <span class="code">id</span> of "output" depending on what data it finds in <span class="code">greatNewsData</span>.</p>
+	<p>Obviously, this is a very rudimentary example of this, but you could easily have a dataset of things like unemployment or same-sex marriage laws and use that to color states in. Data can also be output in other ways, such as popups or images, which are relatively easy to code with just a little practice!</p>
+</body>
+</html>
